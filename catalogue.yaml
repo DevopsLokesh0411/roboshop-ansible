@@ -55,9 +55,9 @@
       state: present
 
   
-  #- name: Get the categories count
-  #  ansible.builtin.command: mongo --host mongod.techranger.xyz --quiet --eval 'db = db.getsiblingDB("catalogue"); db.products.count()'
-  #  register: product_count
+  - name: Get the categories count
+    ansible.builtin.command: mongo --host mongod.techranger.xyz --quiet --eval 'db = db.getsiblingDB("catalogue"); db.products.count()'
+    register: product_count
 
   #- name: print the count
   #  ansible.builtin.debug:
@@ -65,6 +65,7 @@
 
   - name: load catalogue data
     ansible.builtin.command: mongo --host mongod.techranger.xyz < /app/schema/catalogue.js
+    when: product_count.stdout == 0
 
   - name:  catalouge enable & start #ansible systemctl module
     ansible.builtin.service:
