@@ -69,5 +69,5 @@
   - name:  catalouge enable & start #ansible systemctl module
     ansible.builtin.service:
       name: catalogue
-      state: re-started
+      state: restarted
       enabled: yes
