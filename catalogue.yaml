@@ -65,3 +65,9 @@
 
   - name: load catalogue data
     ansible.builtin.command: mongo --host mongod.techranger.xyz < /app/schema/catalogue.js
+
+  - name:  catalouge enable & start #ansible systemctl module
+    ansible.builtin.service:
+      name: catalogue
+      state: re-started
+      enabled: yes
