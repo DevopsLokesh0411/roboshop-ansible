@@ -1,0 +1,11 @@
+- name: Deploy the catalogue application
+  hosts: catalogue
+  become: yes 
+  tasks:
+  - name: disable ols nodejs
+    ansible.builtin.command:  dnf module disable nodejs -y ; dnf module enable nodejs:18 -y
+
+  - name: nodejs install
+    ansible.builtin.package:
+      name: nodejs
+      state: present
