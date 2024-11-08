@@ -1,0 +1,79 @@
+- name: Deploy the user application
+  hosts: user
+  become: yes 
+  tasks:
+  - name: disable old nodejs and enable nodejs
+    ansible.builtin.shell:  dnf module disable nodejs -y ; dnf module enable nodejs:18 -y
+
+  - name: nodejs install
+    ansible.builtin.package:
+      name: nodejs
+      state: present
+
+  - name: creating user  #ansible user module
+    ansible.builtin.user: 
+      name: roboshop
+
+  - name: removing directory recrusively
+    ansible.builtin.file:
+      path: /app
+      state: absent
+
+  - name: creating a directory # ansible create directory
+    ansible.builtin.file:
+      path: /app
+      state: directory
+
+  - name: Download the code #ansible download file : Google
+    ansible.builtin.get_url:
+      url: https://roboshop-builds.s3.amazonaws.com/user.zip
+      dest: /tmp 
+
+  - name: unzipping the code 
+    ansible.builtin.unarchive:
+      src: /tmp/user.zip
+      dest: /app
+      remote_src: yes 
+
+  - name: Install dependencides
+    ansible.builtin.command: npm install
+    args: 
+      chdir: /app
+
+  - name: integrating mongo to user server
+    ansible.builtin.copy:
+      src: user.service
+      dest: /etc/systemd/system/user.service
+
+  - name: reloading the deamon #ansible deamon-reload
+    ansible.builtin.systemd_service:
+      daemon_reload: true
+
+  - name: copying mongodb repo  #ansible copy module
+    ansible.builtin.copy:
+     src: mongodb.repo
+     dest: /etc/yum.repos.d/mongo.repo
+
+  - name:  mongodb client install #ansible install package
+    ansible.builtin.package:
+      name: mongodb-org-shell
+      state: present
+
+  
+  # - name: Get the categories count
+  #   ansible.builtin.command: mongo --host mongod.techranger.xyz --quiet --eval 'db = db.getsiblingDB("user"); db.products.count()'
+  #     register: product_count
+
+  # - name: print the count
+  #   ansible.builtin.debug:
+  #    msg: "product count: {{product_count}}"
+
+  - name: load user data
+    ansible.builtin.command: mongo --host mongod.techranger.xyz < /app/schema/user.js
+    #when: product_count.stdout == "0"
+
+  - name:  catalouge enable & start #ansible systemctl module
+    ansible.builtin.service:
+      name: user
+      state: restarted
+      enabled: yes
