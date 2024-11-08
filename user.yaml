@@ -75,5 +75,5 @@
   - name:  user enable & start #ansible systemctl module
     ansible.builtin.service:
       name: user
-      state: restarted
+      state: started
       enabled: yes
