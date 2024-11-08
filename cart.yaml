@@ -40,7 +40,7 @@
     args: 
       chdir: /app
 
-  - name: integrating redis to cart server
+  - name: integrating redis to cart & catalogue server
     ansible.builtin.copy:
       src: cart.service
       dest: /etc/systemd/system/cart.service
